@@ -30,6 +30,7 @@ from pydub.silence import split_on_silence
 # from Crypto.Random import get_random_bytes
 # import base64
 
+#pip install python-dotenv
 from dotenv import load_dotenv
 import os
 

@@ -50,7 +50,7 @@
         <video id="video" width="100%" height="auto" autoplay></video>
         <button class="submit-api-key" id="click-photo">Take Photo</button>
         <canvas id="canvas" width="320" height="240"></canvas>
-        <input type="file" id="takePictureFile" name="filename">
+        <input type="file" id="takePictureFile" name="filename" style="display:none">
 
         <p>Extracted Text:</p>
         <textarea class="textOutput" id="takePictureTextOutput" rows="4" cols="50"></textarea>
@@ -505,7 +505,7 @@
         .then(data => {
           // Update textOutput div with the extracted text
           console.log(data)
-          if(document.getElementById('restoreHistory')){
+          if(document.getElementById('restoreHistory').style.display === "block"){
             if(data === 'Error: Unsupported file format.'){
               document.getElementById('restoreHistoryErrorMessage2').style.display = "block";
               return;
@@ -515,6 +515,7 @@
               hidePopup('restoreHistory')
             }
           } else{
+            console.log(data)
             document.getElementById(inputId + "TextOutput").value = data
           }
 
