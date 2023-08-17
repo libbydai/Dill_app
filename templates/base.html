@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Dill </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Encryption JS library -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> -->
+    <!-- Font Awesome version 5 CSS -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> -->
+  </head>
+
+  <body>
+
+    <!-- Popup for "quickStart" -->
+    <div class="popup" id="quickStart">
+      <button class="close">&times;</button>
+      <h1>Welcome</h1>
+      <p>
+        Dill is a <strong>personalizable</strong> tutor that can <u>read images</u> and <u>understand speech</u>!
+        <br><br>
+        Upload a <strong>picture</strong> of your <strong>textbook</strong>, a <strong>pdf</strong>, or an <strong>audio file</strong> here:
+      </p>
+      <form>
+        <input type="file" id="quickStartFile" name="filename" onchange="uploadFile('quickStart')">
+        <p>Extracted Text:</p>
+        <textarea class="textOutput" id="quickStartTextOutput" rows="4" cols="50"></textarea>
+        <div id="quickStartErrorMessage" style="color: red; display: none; text-align: center;">No Material Provided</div>
+        <p>What do you want to do?</p>
+        <select class="dropdown" id="quickStartDropdown" onchange="toggleQuestionTextbox('quickStart')">
+          <option value="Ask a question">Ask a question</option>
+          <option value="Summarize the text">Summarize the text</option>
+          <option value="Take notes">Take notes</option>
+          <option value="Annotate" selected>Annotate</option>
+        </select>
+        <textarea class="questionInput" id="quickStartQuestionInput" rows="2" cols="50" style="display: none;"></textarea>
+        <a href="#" onclick="sendExtractedText('quickStart')">Ask Dill</a>
+      </form>
+    </div>
+
+    <!-- Popup for "take picture" -->
+    <div class="popup" id="takePicture">
+      <button class="close">&times;</button>
+      <h1>Take Picture</h1>
+      <form>
+        <button class="submit-api-key" id="start-camera">Start Camera</button>
+        <video id="video" width="100%" height="auto" autoplay></video>
+        <button class="submit-api-key" id="click-photo">Take Photo</button>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <input type="file" id="takePictureFile" name="filename">
+
+        <p>Extracted Text:</p>
+        <textarea class="textOutput" id="takePictureTextOutput" rows="4" cols="50"></textarea>
+        <div id="takePictureErrorMessage" style="color: red; display: none; text-align: center;">No Material Provided</div>
+        <p>What do you want to do?</p>
+        <select class="dropdown" id="takePictureDropdown" onchange="toggleQuestionTextbox('takePicture')">
+          <option value="Ask a question">Ask a question</option>
+          <option value="Summarize the text">Summarize the text</option>
+          <option value="Take notes">Take notes</option>
+          <option value="Annotate" selected>Annotate</option>
+        </select>
+        <textarea class="questionInput" id="takePictureQuestionInput" rows="2" cols="50" style="display: none;"></textarea>
+        <a href="#" onclick="sendExtractedText('takePicture')">Ask Dill</a>
+      </form>
+    </div>
+
+    <!-- Popup for "Upload Photo" -->
+    <div class="popup" id="uploadPhoto">
+      <button class="close">&times;</button>
+      <h1>Upload</h1>
+      <p>
+        Upload image or audio file:
+      </p>
+      <form>
+        <input type="file" id="uploadPhotoFile" name="filename" onchange="uploadFile('uploadPhoto')">
+        <p>Extracted Text:</p>
+        <textarea class="textOutput" id="uploadPhotoTextOutput" rows="4" cols="50"></textarea>
+        <div id="uploadPhotoErrorMessage" style="color: red; display: none; text-align: center;">No Material Provided</div>
+        <p>What do you want to do?</p>
+        <select class="dropdown" id="uploadPhotoDropdown" onchange="toggleQuestionTextbox('uploadPhoto')">
+          <option value="Ask a question">Ask a question</option>
+          <option value="Summarize the text">Summarize the text</option>
+          <option value="Take notes">Take notes</option>
+          <option value="Annotate" selected>Annotate</option>
+        </select>
+        <textarea class="questionInput" id="uploadPhotoQuestionInput" rows="2" cols="50" style="display: none;"></textarea>
+        <a href="#" onclick="sendExtractedText('uploadPhoto')">Ask Dill</a>
+      </form>
+    </div>
+
+    <!-- Popup for "generateEssay" -->
+    <div class="popup" id="generateEssay">
+      <button class="close">&times;</button>
+      <h1>Essay</h1>
+      <p>Topic:</p>
+        <textarea class="textOutput" id="topic" rows="1" cols="50" placeholder="Specific topic..."></textarea>
+      <p>Word Count:</p>
+      <textarea class="textOutput" id="wordCount" rows="1" cols="50" placeholder="500-800 words..."></textarea>
+
+      <select class="dropdown" id="generateEssayDropdown" onchange="toggleEssay()">
+        <option value="selectEssayComplexity">Select Essay Complexity</option>
+        <option value="Basic">Basic</option>
+        <option value="Advanced">Advanced</option>
+      </select>
+
+      <p class="basic">Number of Paragraphs:</p>
+        <textarea class="basic" id="numberOfParagraphs" rows="1" cols="50" placeholder="..."></textarea>
+      <p class="basic">Target Audience:</p>
+        <textarea class="basic" id="targetAudience" rows="1" cols="50" placeholder="People interested in _____..."></textarea>
+      <p class="basic">Tone:</p>
+        <textarea class="basic" id="tone" rows="1" cols="50" placeholder="Informative, Engaging, Assertive, Humorous..."></textarea>
+      
+      <p class="advanced">Number of Paragraphs:</p>
+        <textarea class="advanced" id="numberOfParagraphs2" rows="1" cols="50" placeholder="..."></textarea>
+      <p class="advanced">Target Audience:</p>
+        <textarea class="advanced" id="targetAudience2" rows="1" cols="50" placeholder="People interested in _____..."></textarea>
+      <p class="advanced">Tone:</p>
+        <textarea class="advanced" id="tone2" rows="1" cols="50" placeholder="Informative, Engaging, Assertive, Humorous..."></textarea>
+      <p class="advanced">Complexity:</p>
+        <textarea class="advanced" id="complexity" rows="1" cols="50" placeholder="Low..."></textarea>
+      <p class="advanced">Specific examples/anecdotes to incorperate:</p>
+        <textarea class="advanced" id="specificAnecdotes" rows="1" cols="50" placeholder="..."></textarea>
+      <p class="advanced">References:</p>
+        <textarea class="advanced" id="references" rows="1" cols="50" placeholder="Name of source, author..."></textarea>
+      <div id="errorMessage" style="color: red; display: none;">Make sure all fields are filled out</div>
+
+        <a href="#" onclick="sendEssayInfo()">Ask Dill</a>
+    </div>
+
+    <!-- Popup for "customizeTutor" -->
+    <div class="popup" id="customizeTutor">
+      <button class="close">&times;</button>
+      <h1>Customize Dill</h1>
+      <p>Premade Personalities:</p>
+      <a href="#" onclick="sendCustomizeTutorPrompt('0')">Dill</a>
+      <div class="tutor-links">
+        <a href="#" onclick="sendCustomizeTutorPrompt('1')">Shreyas</a>
+        <a href="#" onclick="sendCustomizeTutorPrompt('2')">Chloe</a>
+        <a href="#" onclick="sendCustomizeTutorPrompt('3')">Sohum</a>
+        <a href="#" onclick="sendCustomizeTutorPrompt('4')">Steven</a>
+      </div>
+      
+      <p>Type specific instructions for how your personal tutor <strong>Kate</strong> should act:</p>
+      <textarea class="textOutput" id="customizeTutorTextOutput" rows="4" cols="50" placeholder="Act as if..."></textarea>
+      <div id="customizeTutorErrorMessage" style="color: red; display: none; text-align: center;">No Material Provided</div>
+
+      <a id="examplePrompt" href="#" onclick="examplePrompt()">Example prompt?</a>
+      <br>
+      <a href="#" onclick="sendCustomizeTutorPrompt('custom')">Ask Dill</a>
+    </div>
+
+   <!-- Popup for "restore history" -->
+   <div class="popup" id="restoreHistory">
+    <button class="close">&times;</button>
+    <h1>Restore History</h1>
+    <p>To remind DILL of your previous conversation, please upload the <strong>txt file</strong> downloaded:</p>
+    <form>
+      <input type="file" id="restoreHistoryFile" name="filename">
+      <div id="restoreHistoryErrorMessage" style="color: red; display: none; text-align: center;">No File Provided</div>
+      <div id="restoreHistoryErrorMessage2" style="color: red; display: none; text-align: center;">Error: Unsupported file format.</div>
+      <a href="#" onclick="uploadFile('restoreHistory')">Remind Dill</a>
+    </form>
+  </div>
+
+    <body id="body-pd">
+      <header class="header" id="header">
+
+          <div class="header_toggle"> 
+            <i class='bx bx-menu' id="header-toggle"></i> 
+          </div>
+
+          <nav class="navbar navbar-light" style="background-color: #88A0EC;">
+            <div class="Logo" style="width: 1280px; height: 45px; position: relative">
+                <div class="Dill" style="width: 80px; height: 75px; left: 70px; top: -7px; position: absolute; color: #3B4490; font-size: 40px; font-family: Baloo Bhaijaan; font-weight: 400; word-wrap: break-word">Dill</div>
+                <div class="Logo" style="width: 29px; height: 34.40px; left: 21px; top: 6px; position: absolute">
+                <div class="Body" style="width: 29px; height: 8.77px; left: 0px; top: 25.63px; position: absolute; background: #3B4490; border-radius: 33px"></div>
+                <div class="Head" style="width: 29px; height: 20.23px; left: 0px; top: 0px; position: absolute; background: #3B4490; border-radius: 3px"></div>
+                <div class="Neck" style="width: 6.07px; height: 2.02px; left: 11.47px; top: 21.58px; position: absolute; background: #3B4490; border-radius: 33px"></div>
+                <div class="Eye" style="width: 15.51px; height: 15.51px; left: 6.74px; top: 2.70px; position: absolute; background: #FDFDFF; border-radius: 9999px"></div>
+                <div class="Pupil" style="width: 11.47px; height: 11.47px; left: 8.77px; top: 4.05px; position: absolute; background: #2D323A; border-radius: 9999px"></div>
+                <div class="Highlight" style="width: 4.05px; height: 4.72px; left: 17.53px; top: 6.07px; position: absolute; background: #FDFDFF; border-radius: 9999px"></div>
+            </div>
+          </nav>   
+              
+      </header>
+
+        <div class="l-navbar" id="nav-bar">
+          <nav class="nav">
+            
+              <div> 
+                <a href="#" class="nav_logo"> 
+                  <span class="nav_logo-name" style="color: rgb(80, 80, 160);">Dill</span> 
+                </a>
+                
+                  <div class="nav_list">
+
+                    <a href="#" class="nav_link" data-popup="takePicture" >
+                      <i class="fas fa-camera fa-lg"></i>
+                      <span class="nav_name">Take Picture</span>
+                    </a>
+
+                    <a href="#" class="nav_link" data-popup="uploadPhoto">
+                      <i class="fas fa-upload fa-lg"></i>
+                      <span class="nav_name">Upload Photo</span>
+                    </a>
+                    <a href="#" class="nav_link" data-popup="generateEssay"> 
+                      <i class="fas fa-pencil-alt fa-lg"></i>
+                      <span class="nav_name">Generate Essay</span> 
+                    </a> 
+                    <a href="#" class="nav_link" data-popup="customizeTutor"> 
+                      <i class="fas fa-users fa-lg"></i> 
+                      <span class="nav_name">Customize Dill</span> 
+                    </a> 
+                    <a href="#" class="nav_link" data-popup="restoreHistory"> 
+                      <i class="fas fa-comments fa-lg"></i>
+                      <span class="nav_name">Restore History</span> 
+                    </a> 
+                  </div>  
+              </div> 
+
+
+
+              <a href="#" class="nav_link" onclick="getHistory()"> 
+                <i class="fas fa-download fa-lg"></i> 
+                <span class="nav_name">Get History</span> 
+              </a>
+
+          </nav>
+        </div>
+
+      <!--Container Main start-->
+      <div class="height-100 bg-light">
+        <br>
+        <h1 class="text-center">Dill the Tutor</h1>
+        <br>
+        <p class="text-center"><strong>DILL</strong> is a chat bot similar to Chat GPT. <br>Use it to decipher a <strong>textbook page</strong>, write <strong>essays</strong>, and <strong>understand</strong> academic articles!</p>
+        <br>
+        <div class="nav_list api-key-container">
+          <input type="password" id="api-key-input" placeholder="Enter your Openai API key">
+          <button class="submit-api-key" onclick="apiKey()">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <div id="errorMessage2" style="color: red; display: none; text-align: center;">Invalid API key, default key restored</div>
+        <br>
+        <!-- <a href="#" id="quickstartButton" data-popup="quickStart">Quickstart</a> -->
+        <a href="#" onclick="showPopup('quickStart')">Quickstart</a>
+        <br>
+        <div id="chat-container">
+          <div id="chat-log"></div>
+          <button id="send-newest-message" onclick="sendNewestMessageToBackend()">
+            <i class="fas fa-volume-up fa-lg" id="speakerIcon"></i>
+          </button>
+          <div id="message-box-container">
+            <div id="message-box">
+              <input type="text" id="user-input" placeholder="Type your message...">
+              <button id="record-btn">
+                <i class="fas fa-microphone fa-lg" id="microphone-icon"></i>
+              </button>
+              <button id="send-button" onclick="getMessage()">Send
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Container Main end-->
+  <script>
+//Sidebar___________________________________________________________________
+    // Wait till DOM is loaded to execute function
+    document.addEventListener("DOMContentLoaded", function(event) {
+    
+    const showNavbar = (toggleId, navId, bodyId, headerId) =>{
+    const toggle = document.getElementById(toggleId),
+    nav = document.getElementById(navId),
+    bodypd = document.getElementById(bodyId),
+    headerpd = document.getElementById(headerId)
+    
+    // Validate that all variables exist
+    if(toggle && nav && bodypd && headerpd){
+      toggle.addEventListener('click', ()=>{
+      // show navbar
+      nav.classList.toggle('show')
+      // change icon
+      toggle.classList.toggle('bx-x')
+      // add padding to body
+      bodypd.classList.toggle('body-pd')
+      // add padding to header
+      headerpd.classList.toggle('body-pd')
+      })
+    }
+    }
+    
+    showNavbar('header-toggle','nav-bar','body-pd','header')
+    
+    /*===== LINK ACTIVE =====*/
+    const linkColor = document.querySelectorAll('.nav_link')
+    
+    function colorLink(){
+      if(linkColor){
+        linkColor.forEach(l=> l.classList.remove('active'))
+        this.classList.add('active')
+      }
+    }
+    linkColor.forEach(l=> l.addEventListener('click', colorLink))
+      // Your code to run since DOM is loaded and ready
+    });
+//__________________________________________________________________________
+
+
+    // define variables
+    var chatLog = document.getElementById("chat-log");
+    var AIname = 'DILL'
+
+    // function hashString(input) {
+    // var hash = 0, i, chr;
+    // for (i = 0; i < input.length; i++) {
+    //     chr = input.charCodeAt(i);
+    //     hash = ((hash << 5) - hash) + chr;
+    //     hash |= 0; // Convert to 32bit integer
+    // }
+    // return hash.toString();
+    // }
+
+    function apiKey(){
+      // const apiKey = document.getElementById("api-key-input")
+      // const hashedApiKey = hashString(apiKey)
+
+      const secretKey = document.getElementById("api-key-input").value;
+      // const password = "P@ssw0rd$-EnCrypT1on";
+
+      // const utf8SecretKey = CryptoJS.enc.Utf8.parse(secretKey);
+
+      // // Encrypt the secret key
+      // const encrypted = CryptoJS.AES.encrypt(utf8SecretKey, password).toString();
+      // console.log(encrypted);
+      fetch("/api", {
+        method: "POST",
+        body: JSON.stringify({ message: secretKey }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.text()) 
+      .then(data => {
+        console.log(data)
+        if(data === "Default key restored"){
+          document.getElementById("errorMessage2").style.display = "block";
+          document.getElementById("api-key-input").value = '';
+        }else {
+          document.getElementById("errorMessage2").style.display = "none";
+        }
+      });
+    }
+
+    // Changing HTML to character code to format text in chat
+    function formatBotResponse(response) {
+      console.log(response);
+      //this supposed to escape the elements in single brackets, but it is not working
+      response = response.replace(/'<(.*?)>'/g, "&#60;$1&#62;");
+
+      // Replace new lines with <br> tags
+      response = response.replace(/\n/g, "<br>");
+
+      // Replace '__' with underlines
+      response = response.replace(/__(.+?)__/g, "<u>$1</u>");
+
+      // Replace '**' with bold
+      response = response.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+      // Replace '*' with italics
+      response = response.replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+      // Replace '''...''' with corresponding code
+      response = response.replace(/```(.+?)```/g, function (match, p1) {
+        return "<pre class='code-box'>" + p1.replace(/<br>/g, "&#10;").replace(/</g, "&#60;").replace(/>/g, "&#62;").replace(/<\t>/g, "&#9;") + "</pre>";
+      });
+      // Replace triple backticks with code boxes with escaping
+      // response = response.replace(/```([\s\S]+?)```/g, function (match, p1) {
+      //   const escapedCode = p1.replace(/<br>/g, "&#10;").replace(/</g, "&#60;").replace(/>/g, "&#62;").replace(/<\t>/g, "&#9;");
+      //   return "<pre class='code-box'><code>" + escapedCode + "</code></pre>";
+      // });
+
+      // Replace < and > within single quotes
+      // response = response.replace(/'<(.*?)>'/g, function (match, p1) {
+      //   return "'" + p1.replace(/</g, "&#60;").replace(/>/g, "&#62;") + "'";
+      // });
+      console.log(response);
+      return response;
+    }
+    
+    var enter = document.getElementById("user-input");
+    enter.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        // event.preventDefault();
+        document.getElementById("send-button").click();
+      }
+    });
+
+    // Taking input message, clearing it, sending to print in chat-log
+    function getMessage(){
+      var userInput = document.getElementById("user-input").value;
+
+      document.getElementById("user-input").value = "";
+      printInput(userInput)
+    }
+
+    // Printing user in chat-log, sending to sending function
+    function printInput(userInput){
+      chatLog.innerHTML += "<div class='chat-message'><strong>You:</strong><br>" + formatBotResponse(userInput) + "</div>";
+      sendMessage(userInput)
+    }
+    
+    // sending to backend server
+    function sendMessage(userInput) {
+      fetch("/send-message", {
+        method: "POST",
+        body: JSON.stringify({ message: userInput }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Append the AI's response to the chat log after formatting
+        chatLog.innerHTML += "<div class='chat-message'><strong>" + AIname + ":</strong><br>" + formatBotResponse(data.message) + "</div>";
+        // Scroll to the bottom of the chat log to show the latest messages
+        chatLog.scrollTop = chatLog.scrollHeight;
+      });
+    }
+
+    // Function to show the popup
+    function showPopup(popupId) {
+      document.getElementById('quickStart').style.display = "none";
+      document.getElementById('takePicture').style.display = "none";
+      document.getElementById('uploadPhoto').style.display = "none";
+      document.getElementById('generateEssay').style.display = "none";
+      document.getElementById('customizeTutor').style.display = "none";
+      document.getElementById('restoreHistory').style.display = "none";
+
+      const popup = document.getElementById(popupId);
+      if (popup){
+        popup.style.display = "block";
+      }
+    }
+
+    // Function to hide the popup
+    function hidePopup(popupId) {
+      const textOutput = document.getElementById(popupId + "TextOutput");
+      const fileInput = document.getElementById(popupId + "File");
+      const questionInput = document.getElementById(popupId + "QuestionInput");
+      const errorMessage = document.getElementById(popupId + "ErrorMessage");
+      if (textOutput){
+        textOutput.value = ''
+      }
+      if (fileInput){
+        fileInput.value = ''
+      }
+      if (questionInput){
+        questionInput.value = ''
+      }
+      if (errorMessage){
+        errorMessage.style.display = "none"
+      }
+      document.getElementById(popupId).style.display = 'none';
+    }
+
+    // Add event listeners to each button in the sidebar
+    document.querySelectorAll(".nav_link").forEach((button) => {
+      button.addEventListener("click", function() {
+        // Get the data-popup attribute value from the button
+        const popupId = button.getAttribute("data-popup");
+        showPopup(popupId);
+      });
+    });
+    
+    // Add event listeners to close buttons inside each popup
+    document.querySelectorAll(".close").forEach((closeButton) => {
+      closeButton.addEventListener("click", function() {
+        // Get the parent popup element and hide it
+        const popupId = closeButton.parentElement.id;
+        hidePopup(popupId);
+      });
+    });
+    
+//file upload_______________________________________________________________
+    function uploadFile(inputId) {
+      console.log("hello")
+      const fileInput = document.getElementById(inputId + "File");
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      if (file){
+        console.log('file exists')
+        document.getElementById('restoreHistoryErrorMessage').style.display = "none"
+        formData.append("filename", file);
+        
+        fetch("/upload", {
+          method: "POST",
+          body: formData,
+        })
+        .then(response => response.text()) // Convert the response to text
+        .then(data => {
+          // Update textOutput div with the extracted text
+          console.log(data)
+          if(document.getElementById('restoreHistory')){
+            if(data === 'Error: Unsupported file format.'){
+              document.getElementById('restoreHistoryErrorMessage2').style.display = "block";
+              return;
+            }
+            else{
+              document.getElementById('restoreHistoryErrorMessage2').style.display = "none";
+              hidePopup('restoreHistory')
+            }
+          } else{
+            document.getElementById(inputId + "TextOutput").value = data
+          }
+
+        });
+      }
+      else{
+        console.log('oopsies')
+        document.getElementById('restoreHistoryErrorMessage').style.display = "block"
+      }
+    }
+
+//__________________________________________________________________________
+
+//camera____________________________________________________________________
+    let camera_button = document.querySelector("#start-camera");
+    let video = document.querySelector("#video");
+    let click_button = document.querySelector("#click-photo");
+    let canvas = document.querySelector("#canvas");
+    
+    camera_button.addEventListener('click', async function(event) {
+      event.preventDefault(); // Prevent form submission
+      let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      video.srcObject = stream;
+    });
+    
+    function createFileList(file) {
+      const fileList = new DataTransfer();
+      fileList.items.add(file);
+      return fileList;
+    }
+    
+    click_button.addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent form submission
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+      let dataURL = canvas.toDataURL('image/jpeg');
+      let file = dataURLtoFile(dataURL, 'test.jpg');
+    
+      // Create a FileList-like object containing the file
+      const fileList = createFileList(file);
+    
+      // Set the 'files' property of the file input element to the created FileList
+      const fileInput = document.querySelector("#takePictureFile");
+      fileInput.files = fileList.files;
+      uploadFile('takePicture')
+    });
+    
+    // Helper function to convert data URL to File object
+    function dataURLtoFile(dataURL, filename) {
+      const arr = dataURL.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, { type: mime });
+    }
+//__________________________________________________________________________
+
+//essay_____________________________________________________________________
+    function toggleEssay() {
+      const selectedOption = document.getElementById(`generateEssayDropdown`).value;
+      const basicElements = document.getElementsByClassName("basic");
+      const advancedElements = document.getElementsByClassName("advanced");
+
+      if (selectedOption === "Basic") {
+        // Show Basic elements and hide Advanced elements
+        for (const element of basicElements) {
+          element.style.display = "block";
+        }
+        for (const element of advancedElements) {
+          element.style.display = "none";
+        }
+      } else if (selectedOption === "Advanced") {
+        // Show Advanced elements and hide Basic elements
+        for (const element of basicElements) {
+          element.style.display = "none";
+        }
+        for (const element of advancedElements) {
+          element.style.display = "block";
+        }
+      } else if (selectedOption === "selectEssayComplexity") {
+        // Show Advanced elements and hide Basic elements
+        for (const element of basicElements) {
+          element.style.display = "none";
+        }
+        for (const element of advancedElements) {
+          element.style.display = "none";
+        }
+      } 
+    }
+
+    function sendEssayInfo() {
+      const selectedOption = document.getElementById(`generateEssayDropdown`).value;
+      const basicElements = document.getElementsByClassName("basic");
+      const advancedElements = document.getElementsByClassName("advanced");
+      let collectedResponses = "";
+
+      let hasEmptyField = false; // Flag to check if any field is empty
+
+      // Collect responses for "Topic" and "Word Count"
+      const topic = document.getElementById("topic").value;
+      const wordCount = document.getElementById("wordCount").value;
+
+      if (selectedOption === "Basic") {
+        // Collect responses for Basic class elements
+        for (const element of basicElements) {
+          const response = element.value;
+          if (!response) {
+            hasEmptyField = true;
+          } else {
+            hasEmptyField = false;
+            collectedResponses += `${element.previousElementSibling.textContent} ${response}\n`;
+          }
+        }
+      } else if (selectedOption === "Advanced") {
+        // Collect responses for Advanced class elements
+        for (const element of advancedElements) {
+          const response = element.value;
+          if (!response) {
+            hasEmptyField = true;
+          } else {
+            hasEmptyField = false;
+            collectedResponses += `${element.previousElementSibling.textContent} ${response}\n`;
+          }
+        }
+      }
+      
+      //error checking
+      if (hasEmptyField) {
+        document.getElementById("errorMessage").style.display = "block";
+        return;
+      } else {
+        document.getElementById("errorMessage").style.display = "none";
+      }
+
+      if (!topic || !wordCount) {
+          hasEmptyField = true;
+        } else {
+          hasEmptyField = false;
+          collectedResponses += `Topic: ${topic}\nWord Count: ${wordCount}\n`;
+        }
+      
+      fetch("/customize-tutor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({message: 'Act as a content writer, use the given parameters to write a professional essay in full sentences.'}),
+      })
+      AIname = 'DILL';
+
+      collectedResponses += 'Key takeaway: Highlighted at the end of the article to summarize the main points\nRhetorical questions: Integrated strategically to emphasize key points and engage readers\nFigures of speech: Employed selectively to captivate the reader and underscore essential points\nIdiomatic expressions: Used sparingly and fittingly to inject personality and convey ideas effectively\nChanges for readability: Continuously made, focusing on clarity, flow, and a seamless reading experience\nExamples/evidence: Back up each argument with well-explained and credible evidence (include this in the list of references below)\nCitations and references: Provide a list of credible references and case studies that support the essay\nContent Formatting:\n- **Bold** text for important phrases or headings\n- *Italic text* for emphasizing specific words, quotes, or titles\n- Blockquotes for highlighting quotes or excerpts from other sources\n- Headers (H1, H2, H3, etc.) for organizing content into sections and sub-sections\n- White space to break up large chunks of text and improve readability\n- Include word count at bottom\nVisual Aids: Suggest suitable visual elements (images, graphs, charts) to complement the content'
+      
+      sendMessage(collectedResponses);
+      console.log(collectedResponses);
+      hidePopup('generateEssay')
+    }
+//__________________________________________________________________________
+
+//personalize_______________________________________________________________
+    function sendCustomizeTutorPrompt(type) {
+      let customizeTutorText;
+      console.log(type);
+      if (type === 'custom') {
+        if(document.getElementById("customizeTutorTextOutput").value === '') {
+          document.getElementById('customizeTutorErrorMessage').style.display = "block"
+          return;
+        }
+        document.getElementById('customizeTutorErrorMessage').style.display = "block"
+        customizeTutorText = 'You are a tutor named Kate. ' + document.getElementById("customizeTutorTextOutput").value;
+      } else {
+        customizeTutorText = type;
+      }
+      console.log(customizeTutorText)
+
+      fetch("/customize-tutor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({message: customizeTutorText}),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.message)
+        AIname = data.message
+      });
+
+      hidePopup('customizeTutor')
+    }
+//__________________________________________________________________________
+
+//mic_______________________________________________________________________
+    const recordBtn = document.getElementById('record-btn');
+    const messageBox = document.getElementById('user-input');
+    const microphoneIcon = document.getElementById('microphone-icon');
+    
+    let recognition;
+    
+    // Check if browser supports the Web Speech API
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+    } else if ('SpeechRecognition' in window) {
+        recognition = new SpeechRecognition();
+    } else {
+        messageBox.value = 'Your browser does not support the Web Speech API.';
+        recordBtn.disabled = true;
+    }
+    
+    let isRecording = false;
+    let transcript = '';
+    let interimTranscript = ''; 
+    
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    recognition.onstart = () => {
+        if (document.getElementById('user-input').value === "") {
+            transcript = "";
+            interimTranscript = "";
+            console.log("hello");
+        }
+    
+        messageBox.placeholder = 'Listening...';
+        microphoneIcon.classList.add('recording'); // Add the 'recording' class to change the color
+    };
+    
+    recognition.onresult = (event) => {
+        interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                transcript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        messageBox.value = transcript + interimTranscript;
+    };
+    
+    recognition.onerror = (event) => {
+        messageBox.value = 'Error occurred in recognition: ' + event.error;
+        stopRecording();
+    };
+    
+    recognition.onend = () => {
+      transcript += '. ';
+        // messageBox.value = 'Speech recognition stopped.';
+        // recordBtn.innerText = 'Start Recording';
+        microphoneIcon.classList.remove('recording');
+        messageBox.placeholder = 'Type your message...';
+    };
+    
+    function startRecording() {
+        recognition.start();
+        isRecording = true;
+    }
+    
+    function stopRecording() {
+        recognition.stop();
+        isRecording = false;
+    }
+    
+    recordBtn.addEventListener('click', () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+//__________________________________________________________________________
+
+//speak_____________________________________________________________________
+    // send last message to be read out loud (also handle colors of icon)
+    function sendNewestMessageToBackend() {
+      var chatMessages = document.getElementsByClassName("chat-message");
+      var newestMessage = chatMessages[chatMessages.length - 1].innerText;
+      const speakerIcon = document.getElementById('speakerIcon');
+      speakerIcon.classList.add('speaking');
+      fetch("/read-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: newestMessage }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data); // log to ensure right message
+        speakerIcon.classList.remove('speaking');
+      });
+    }
+//__________________________________________________________________________
+
+    // Function to toggle the question textbox based on the selected option
+    function toggleQuestionTextbox(inputId) {
+      const selectedOption = document.getElementById(inputId + "Dropdown").value;
+      const questionInput = document.getElementById(inputId + "QuestionInput");
+    
+      questionInput.style.display = selectedOption === "Ask a question" ? "block" : "none";
+    }
+    
+    // Sendind text from images + audio
+    function sendExtractedText(inputId) {
+      const textOutput = document.getElementById(inputId + "TextOutput").value;
+      const selectedOption = document.getElementById(inputId + "Dropdown").value;
+      const questionInput = document.getElementById(inputId + "QuestionInput").value;
+      const errorMessage = document.getElementById(inputId + "ErrorMessage");
+      if (textOutput === 'No text detected.' || textOutput === 'Error: Unidentified image format.' || textOutput === 'Error: Unsupported file format.' || textOutput === '') {
+        errorMessage.style.display = "block";
+        return;
+      }
+
+      // Customize the user input message based on the selected option
+      let userInput;
+      if (selectedOption === "Ask a question") {
+        userInput = `${questionInput} based on this text: ${textOutput}`;
+      } else if (selectedOption === "Summarize the text") {
+        userInput = `Summarize the following text: ${textOutput}`;
+      } else if (selectedOption === "Take notes") {
+        userInput = `Take notes on the following text: ${textOutput}`;
+      } else if (selectedOption === "Annotate") {
+        userInput = `Annotate the following text (bold the key concepts and underline main ideas): ${textOutput}`;
+      } else {
+        userInput = textOutput; // Use the extracted text as it is if none of the options match
+      }
+      printInput(userInput);
+      hidePopup(inputId)
+    }
+
+    function download(file, text) {       
+      //creating an invisible element
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8, '+ encodeURIComponent(text));
+      element.setAttribute('download', file);
+  
+      // Above code is equivalent to <a href="path of file" download="file name">
+  
+      document.body.appendChild(element);
+  
+      //onClick property
+      element.click();
+  
+      document.body.removeChild(element);
+    }
+  
+var text = ''
+  function getHistory(){
+        // Make a GET request when the button is clicked
+        fetch('/download', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())  // Assuming the response is in JSON format
+    .then(data => {
+        // Handle the response data as needed
+        console.log(data);
+        text = JSON.stringify(data, null, 2); // Adding null and 2 for indentation;
+        var filename = "chatHistory.txt";
+        download(filename, text);
+    })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    // });
+  }
+
+  function examplePrompt(){
+    document.getElementById('customizeTutorTextOutput').value = 'Act as an AI art history/music theory tutor. I will provide you with a student who needs help improving their art history and music theory knowledge and skills. Your task is to use artificial intelligence tools, such as natural language processing, to help students understand complex topics in art history and music theory. Help improve the students memorization skills and analytical skills. It is very important that you always ask follow-up questions. Be entertaining and use emojis.'
+  }
+
+  </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </body>
+</html>
