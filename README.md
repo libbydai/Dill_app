@@ -1,6 +1,6 @@
 # Dill The Tutor
 
-Dill is an online chatbot developped from OpenAI's API. 
+Dill is an online chatbot developed from OpenAI's API. 
 
 # Libraries needed:
 pip install:
